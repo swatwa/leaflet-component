@@ -14,7 +14,7 @@ export class LeafletMapControl
     container: HTMLDivElement
   ): void {
     this.container = container;
-    this.coordinates = context.parameters.coordinates?.raw || "47.25,-122.44";
+    this.coordinates = context.parameters.coordinates?.raw || "";
 
     // Style the container to fill the available space
     this.container.style.width = "100%";
@@ -27,6 +27,14 @@ export class LeafletMapControl
     this.iframe.src = this.generateMapUrl(this.coordinates);
     this.iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
 
+    // Add an event listener to receive messages from the iframe
+    window.addEventListener("message", (event) => {
+      // Check if the message is from our iframe and has coordinates
+      if (event.data && event.data.lat && event.data.lng) {
+        this.coordinates = `${event.data.lat},${event.data.lng}`;
+        notifyOutputChanged();
+      }
+    });
     // Ensure iframe fills the container
     this.iframe.style.position = "absolute";
     this.iframe.style.top = "0";
@@ -39,9 +47,14 @@ export class LeafletMapControl
   }
 
   private generateMapUrl(coords: string): string {
-    return `https://swatwa.github.io/leafletmap/?coords=${encodeURIComponent(
-      this.coordinates
-    )}&pin=true`;
+    // If coordinates exist, pass them. Otherwise, the map will center on the user's location.
+    if (coords) {
+      return `https://swatwa.github.io/leafletmap/?coords=${encodeURIComponent(
+        coords
+      )}`;
+    } else {
+      return `https://swatwa.github.io/leafletmap/`;
+    }
   }
 
   public updateView(context: ComponentFramework.Context<IInputs>): void {
