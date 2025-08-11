@@ -25,7 +25,11 @@ export class LeafletMapControl
     // Create and style the iframe
     this.iframe = document.createElement("iframe");
     this.iframe.src = this.generateMapUrl(this.coordinates);
-    this.iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+    this.iframe.setAttribute(
+      "sandbox",
+      "allow-scripts allow-same-origin allow-modals"
+    );
+    this.iframe.setAttribute("allow", "geolocation"); // Add this line
 
     // Add an event listener to receive messages from the iframe
     window.addEventListener("message", (event) => {
